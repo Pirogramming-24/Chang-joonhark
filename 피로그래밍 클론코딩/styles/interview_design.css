@@ -1,0 +1,370 @@
+/* ========== Layout ========== */
+main {max-width: 1600px; margin:0 auto;}
+
+/* ========== Header ========== */
+main header {
+    background: black;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 40px;
+}
+main header a {max-width: 40px; height: auto;}
+main header a img {width:100%; padding:10px 0;}
+
+main header ul {
+    display: flex;
+    justify-content:right;
+    align-items: center;
+}
+main header ul li {padding:5px; }
+main header ul li:nth-child(4) a{
+    color: #7CE84C;
+}
+main header ul li a {
+    font-size: 18px;
+    font-weight: 500;
+    color: white;
+    transition: all linear;
+}
+
+main header ul li:hover {
+    transform: translateY(-2px);
+}
+
+/* ========== #inter / cohort ========== */
+main #inter {
+    background-color: black;
+    padding: 20px;
+}
+main #inter .cohort {
+    background: black; padding: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+}
+main #inter .cohort h1 {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    font-size: 1.2rem;
+    color: white;
+}
+main #inter .cohort a {
+    padding-right: calc(5%);
+    font-size: 100%;
+    color: white;
+}
+
+/* ========== Interview Contents Section ========== */
+main section.interview-contents {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  background: black;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* interview card */
+main section.interview-contents .interview-card {
+  position: relative;
+  background: #333;
+  border-radius: 10px;
+  padding: 22px 22px 20px;
+  color: #fff;
+  box-shadow: 0 10px 24px black;
+  transition: transform linear;
+  min-height: 160px;
+}
+main section.interview-contents .interview-card:hover {
+  transform: translateY(-2px);
+}
+
+/* more (hamburger) */
+main section.interview-contents .interview-card .more {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 22px;
+  height: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  opacity: 0.75;
+}
+main section.interview-contents .interview-card .more div {
+  width: 100%;
+  height: 2px;
+  background: #bdbdbd;
+  border-radius: 10px;
+}
+main section.interview-contents .interview-card .more:hover {
+  opacity: 1;
+}
+
+/* card header */
+main section.interview-contents .interview-card .interview-card--header {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+}
+
+/* profile image wrapper */
+main section.interview-contents .interview-card .interview-card--header .interview_pic {
+  width: 110px;
+  height: 110px;
+  border-radius: 100px;
+  background: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+main section.interview-contents .interview-card .interview-card--header .interview_pic img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+main section.interview-contents .interview-card:hover .interview_pic img {
+  transform: scale(1.05);
+}
+
+/* header right area */
+main section.interview-contents .interview-card .interview-card--header .interview-header--right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+main section.interview-contents
+  .interview-card
+  .interview-card--header
+  .interview-header--right
+  .interview-profile--name {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+/* badges */
+main section.interview-contents
+  .interview-card
+  .interview-card--header
+  .interview-header--right
+  .major-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  background: #5286B1;
+  color: white;
+}
+main section.interview-contents
+  .interview-card
+  .interview-card--header
+  .interview-header--right
+  .non-major-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  background: #AE4D2F;
+  color: white;
+}
+
+/* intro text */
+main section.interview-contents
+  .interview-card
+  .interview-card--intro {
+  max-width: 360px;
+  font-size: 16px;
+  color: white;
+  line-height: 1.3;
+  text-align: left;
+  padding-top: 16px;
+}
+
+/* ========== Footer Top ========== */
+main footer#footer-top {
+  background: #3a3a3a;
+  color: #fff;
+}
+main footer#footer-top .footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+/* contact area */
+main footer#footer-top .footer-container .footer--contact {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+main footer#footer-top .footer-container .footer--contact li {
+  list-style: none;
+}
+main footer#footer-top .footer-container .footer--contact li a {
+  color: #eaeaea;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+main footer#footer-top .footer-container .footer--contact li a:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+main footer#footer-top .footer-container .footer--contact .rule-link {
+  color: #fff;
+  font-weight: 700;
+}
+
+/* icons group */
+main footer#footer-top .footer-container .footer--contact .footer-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+main footer#footer-top .footer-container .footer--contact .footer-icons li a {
+  display: inline-flex;
+}
+
+main footer#footer-top .footer-container .footer--contact .footer-icons .emoji {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+main footer#footer-top .footer-container .footer--contact .footer-icons .emoji img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+main footer#footer-top .footer-container .footer--contact li a .emoji {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+main footer#footer-top .footer-container .footer--contact li a .emoji img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  display: block;
+}
+
+main footer#footer-top .footer-container .footer--nav {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+main footer#footer-top .footer-container .footer--nav li {
+  list-style: none;
+}
+main footer#footer-top .footer-container .footer--nav li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  display: inline-block;
+}
+main footer#footer-top .footer-container .footer--nav li a:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
+/* ========== Footer Bottom ========== */
+main footer#footer-bottom {
+  background: #292929;
+  border-top: 1px solid #555;
+}
+main footer#footer-bottom .footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+main footer#footer-bottom .footer-bottom span {
+  color: #aaa;
+  font-size: 13px;
+}
+
+/* ================== 반응형 ================== */
+
+@media (max-width: 850px) {
+  main section.interview-contents {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+    padding: 22px 14px 50px;
+  }
+
+  main section.interview-contents .interview-card .interview-card--header {
+    gap: 14px;
+  }
+
+  main section.interview-contents .interview-card .interview-card--header .interview_pic {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+@media (max-width: 600px) {
+  main section.interview-contents {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 22px 14px 50px;
+  }
+
+  main section.interview-contents .interview-card .interview-card--header {
+    gap: 14px;
+  }
+
+  main section.interview-contents .interview-card .interview-card--header .interview_pic {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+@media (max-width: 1080px) {
+  main footer#footer-top .footer-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  main footer#footer-top .footer-container .footer--nav {
+    justify-content: flex-start;
+    gap: 16px;
+  }
+}
