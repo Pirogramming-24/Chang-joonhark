@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>{% if mode == 'create' %}리뷰 작성{% else %}리뷰 수정{% endif %}</title>
+</head>
+<body>
+  <p><a href="{% url 'posts:list' %}">my Movie reviews</a></p>
+
+  <h1>{% if mode == 'create' %}리뷰 작성{% else %}리뷰 수정{% endif %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">저장</button>
+  </form>
+</body>
+</html>

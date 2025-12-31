@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>My Movie Reviews</title>
+</head>
+<body>
+  <h1>My Movie Reviews</h1>
+
+  <p><a href="{% url 'posts:create' %}">리뷰 작성</a></p>
+
+  <ul>
+    {% for r in reviews %}
+      <li>
+        <a href="{% url 'posts:detail' r.pk %}">
+          {{ r.title }}
+        </a>
+        ({{ r.year }}) / {{ r.get_genre_display }} / ⭐ {{ r.rating }}
+      </li>
+    {% empty %}
+      <li>아직 작성된 리뷰가 없습니다.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>
