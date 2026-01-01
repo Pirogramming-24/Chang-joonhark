@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>My Movie Reviews</title>
+</head>
+<body>
+  <header style="padding:16px; border-bottom:1px solid #ddd;">
+    <a href="{% url 'posts:review_list' %}" style="font-weight:700; text-decoration:none;">
+      my Movie reviews
+    </a>
+  </header>
+
+  <main style="padding:16px;">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
