@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Idea List{% endblock %}
+
+{% block content %}
+<header class="panel__header">
+  <h1 class="panel__title">Idea List</h1>
+  <p class="panel__desc">나의 아이디어를 잊지 말고 기록해보세요</p>
+
+
+  <form class="panel__sort" method="get">
+    <select name="sort" onchange="this.form.submit()">
+      <option value="latest" {% if sort == "latest" %}selected{% endif %}>최신순</option>
+      <option value="old" {% if sort == "old" %}selected{% endif %}>등록순</option>
+      <option value="stars" {% if sort == "stars" %}selected{% endif %}>찜하기순</option>
+      <option value="name" {% if sort == "name" %}selected{% endif %}>이름순</option>
+      <option value="interest" {% if sort == "interest" %}selected{% endif %}>관심도순</option>
+    </select>
+  </form>
+</header>
+
+<div class="grid">
+  {% for idea in page_obj %}
+    <article class="card" data-idea-id="{{ idea.pk }}">
+      <div class="card__thumb">
+        {% if idea.image %}
+          <img src="{{ idea.image.url }}" alt="{{ idea.title }}">
+        {% else %}
+          <div class="card__thumb--empty">NO IMAGE</div>
+        {% endif %}
+      </div>
+
+      <div class="card__body">
+        <a class="card__title" href="{% url 'ideas:detail' idea.pk %}">
+          {{ idea.title }}
+        </a>
+
+        <div class="card__meta">
+          <div>예상 개발 툴 :
+            {% if idea.devtool %}
+              <a href="{% url 'devtools:detail' idea.devtool.pk %}">{{ idea.devtool.name }}</a>
+            {% else %}
+              -
+            {% endif %}
+          </div>
+
+          <div class="card__interest">
+            아이디어 관심도 :
+            <button type="button" class="interest-btn" data-delta="-1">-</button>
+            <span class="interest-value">{{ idea.interest }}</span>
+            <button type="button" class="interest-btn" data-delta="1">+</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  {% empty %}
+    <p>등록된 아이디어가 없습니다.</p>
+  {% endfor %}
+</div>
+
+<!-- pagination -->
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a href="?sort={{ sort }}&page={{ page_obj.previous_page_number }}">‹</a>
+  {% endif %}
+
+  <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+  {% if page_obj.has_next %}
+    <a href="?sort={{ sort }}&page={{ page_obj.next_page_number }}">›</a>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+  const csrftoken = getCookie("csrftoken");
+
+  document.addEventListener("click", async (e) => {
+    const card = e.target.closest(".card");
+    if (!card) return;
+
+    const ideaId = card.dataset.ideaId;
+
+    // 관심도 +/- 조절
+    if (e.target.matches(".interest-btn")) {
+      const delta = e.target.dataset.delta;
+      const formData = new FormData();
+      formData.append("delta", delta);
+
+      try {
+        const res = await fetch(`/ideas/${ideaId}/interest/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": csrftoken },
+          body: formData
+        });
+        const data = await res.json();
+        if (!data.ok) return alert(data.error || "실패");
+
+        card.querySelector(".interest-value").textContent = data.interest;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<header class="panel__header">
+  <h1 class="panel__title">{% if idea %}Idea Update{% else %}Idea Register{% endif %}</h1>
+  <p class="panel__desc">아이디어 등록 페이지 입니다. 당신의 아이디어를 잊지 말고 기록하세요!</p>
+</header>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="form-submit">저장</button>
+</form>
+{% endblock %}

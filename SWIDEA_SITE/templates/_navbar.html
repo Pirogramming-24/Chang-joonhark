@@ -1,0 +1,14 @@
+<nav class="navbar">
+  <div class="navbar__inner">
+    <a class="navbar__brand" href="{% url 'ideas:list' %}">
+      My <span class="accent">SW</span> Idea Manage
+    </a>
+
+    <ul class="navbar__menu">
+      <li><a href="{% url 'ideas:create' %}">아이디어 등록</a></li>
+      <li><a href="{% url 'ideas:list' %}">아이디어 관리</a></li>
+      <li><a href="{% url 'devtools:create' %}">개발툴 등록</a></li>
+      <li><a href="{% url 'devtools:list' %}">개발툴 관리</a></li>
+    </ul>
+  </div>
+</nav>

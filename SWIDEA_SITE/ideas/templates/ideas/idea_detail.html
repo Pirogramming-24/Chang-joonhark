@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Idea Detail{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <header class="panel__header">
+    <h1 class="panel__title">Idea Detail</h1>
+    <p class="panel__desc">아이디어 상세 정보를 확인하세요.</p>
+  </header>
+
+  <article class="detail-card" data-idea-id="{{ idea.pk }}">
+    <div class="detail-card__media">
+      {% if idea.image %}
+        <img class="detail-card__img" src="{{ idea.image.url }}" alt="{{ idea.title }}">
+      {% else %}
+        <div class="detail-card__thumb--empty">NO IMAGE</div>
+      {% endif %}
+    </div>
+
+    <div class="detail-card__body">
+      <h2 class="detail-card__title">
+        {{ idea.title }}
+      </h2>
+
+      <div class="detail-card__meta">
+        <p><strong>1) 아이디어 관심도</strong>: <span class="interest-value">{{ idea.interest }}</span></p>
+        <p>
+          <strong>2) 예상 개발 툴</strong>:
+          {% if idea.devtool %}
+            <a class="link" href="{% url 'devtools:detail' idea.devtool.pk %}">{{ idea.devtool.name }}</a>
+          {% else %}
+            -
+          {% endif %}
+        </p>
+        <p><strong>3) 아이디어 설명</strong></p>
+        <div class="detail-card__content">
+          {{ idea.content|linebreaksbr }}
+        </div>
+      </div>
+
+      <div class="actions">
+        <form method="post" action="{% url 'ideas:delete' idea.pk %}" class="actions__item">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">삭제</button>
+        </form>
+        <a class="btn btn-secondary actions__item" href="{% url 'ideas:list' %}">목록</a>
+        <a class="btn btn-primary actions__item" href="{% url 'ideas:update' idea.pk %}">수정</a>
+      </div>
+
+    </div>
+  </article>
+</section>
+{% endblock %}
