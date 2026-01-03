@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}DevTool List{% endblock %}
+
+{% block content %}
+<header class="panel__header">
+  <h1 class="panel__title">DevTool List</h1>
+  <p class="panel__desc">개발툴 목록 페이지입니다. 자신이 사용가능한 개발툴의 목록을 확인해 보세요.</p>
+</header>
+
+<div class="devtool-table">
+  {% for dt in devtools %}
+    <div class="devtool-row">
+      <a class="devtool-name" href="{% url 'devtools:detail' dt.pk %}">{{ dt.name }}</a>
+      <div class="devtool-kind">{{ dt.kind }}</div>
+      <div class="devtool-content">{{ dt.content }}</div>
+    </div>
+  {% empty %}
+    <p>등록된 개발툴이 없습니다.</p>
+  {% endfor %}
+</div>
+{% endblock %}
