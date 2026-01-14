@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 600px;">
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark fw-bold">상품 정보</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="content" class="form-label">내용</label>
+                    <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="region" class="form-label">지역</label>
+                    <input type="text" class="form-control" id="region" name="region" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="price" class="form-label">가격 (원)</label>
+                    <input type="number" class="form-control" id="price" name="price" value="1000">
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_user" class="form-label">작성자</label>
+                    {{ form.user }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="photo" class="form-label">상품 이미지</label>
+                    <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4 border-success">
+            <div class="card-header bg-success text-white fw-bold">식품 영양 정보 (OCR 분석)</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="ocr-input" class="form-label fw-bold">📸 영양성분표 사진 올리기</label>
+                    <input type="file" class="form-control" id="ocr-input" name="nutrition_image" accept="image/*">
+                    
+                    <div id="ocr-loading" class="mt-2 text-primary" style="display:none;">
+                        <span class="spinner-border spinner-border-sm"></span> AI가 이미지를 분석하고 있습니다...
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <label class="form-label">칼로리 정보 (Kcal)</label>
+                    <input type="number" step="0.1" class="form-control" name="calories" id="calories" placeholder="0">
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">탄수화물 (g)</label>
+                        <input type="number" step="0.1" class="form-control" name="carbohydrate" id="carbohydrate" placeholder="0">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">단백질 (g)</label>
+                        <input type="number" step="0.1" class="form-control" name="protein" id="protein" placeholder="0">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">지방 (g)</label>
+                        <input type="number" step="0.1" class="form-control" name="fat" id="fat" placeholder="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success btn-lg">등록하기</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('ocr-input').addEventListener('change', async function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // 1. 로딩 표시 및 입력창 잠금
+        const loadingDiv = document.getElementById('ocr-loading');
+        const inputs = {
+            cal: document.getElementById('calories'),
+            carb: document.getElementById('carbohydrate'),
+            prot: document.getElementById('protein'),
+            fat: document.getElementById('fat')
+        };
+
+        loadingDiv.style.display = 'block';
+        for (let key in inputs) {
+            inputs[key].value = '';
+            inputs[key].placeholder = '분석 중...';
+            inputs[key].readOnly = true;
+        }
+
+        // 2. 서버로 전송할 데이터 준비
+        const formData = new FormData();
+        
+        // ★★★ [수정 핵심] views.py가 'image'라는 이름을 찾으므로 반드시 맞춰야 합니다! ★★★
+        formData.append('image', file); 
+
+        try {
+            const response = await fetch("{% url 'posts:analyze_image' %}", {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                // 서버가 400이나 500 에러를 보냈을 때
+                throw new Error(result.error || '서버 오류 발생');
+            }
+
+            // 3. 결과 자동 입력
+            // views.py는 { calories: 0, carbohydrate: 0 ... } 형태로 바로 줍니다.
+            // result.success나 result.data 안에 들어있지 않습니다.
+            
+            if (result.error) {
+                alert("분석 실패: " + result.error);
+            } else {
+                inputs.cal.value = result.calories || 0;
+                inputs.carb.value = result.carbohydrate || 0;
+                inputs.prot.value = result.protein || 0;
+                inputs.fat.value = result.fat || 0;
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert("이미지 분석 실패: " + error.message);
+        } finally {
+            // 4. 입력창 잠금 해제
+            loadingDiv.style.display = 'none';
+            for (let key in inputs) {
+                inputs[key].readOnly = false;
+                if (!inputs[key].value) inputs[key].placeholder = '0';
+            }
+        }
+    });
+</script>
+{% endblock %}
