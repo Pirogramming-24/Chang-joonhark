@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Movie Reviews</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [디자인 테마] 검정 & 네온 그린 */
+        :root {
+            --bg-color: #050505;       /* 아주 어두운 배경 */
+            --card-bg: #111111;        /* 카드 배경 */
+            --text-main: #ffffff;      /* 흰색 텍스트 */
+            --neon-green: #00ff41;     /* 네온 그린 포인트 */
+            --gray-text: #aaaaaa;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            display: flex;
+            justify_content: space-between;
+            align_items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--neon-green);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-left: 10px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--neon-green);
+            color: black;
+        }
+        
+        /* 채워진 버튼 스타일 */
+        .nav-btn-filled {
+            background-color: var(--neon-green);
+            color: black;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 768px) {
+        /* 1. 헤더: 로고와 메뉴를 세로로 배치 */
+        header {
+            flex-direction: column;
+            gap: 15px;
+            padding: 15px;
+        }
+
+        /* 2. 메뉴 버튼들: 크기 줄이고 간격 좁힘 */
+        nav {
+            flex-wrap: wrap; /* 버튼이 많으면 줄바꿈 */
+            justify-content: center;
+            gap: 10px !important;
+        }
+
+        .nav-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* 3. 전체 컨테이너 여백 축소 */
+        .container {
+            padding: 20px 10px;
+        }
+    }
+    </style>
+</head>
+<body>
+<header style="display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid #333;">
+        
+        <a href="{% url 'movies:movie_list' %}" class="logo">
+            🎬 My Movie Reviews
+        </a>
+        
+        <nav style="display:flex; align-items:center; gap:20px;">
+            {% if user.is_authenticated %}
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="color:#888; font-size:0.9rem;">
+                        <span style="color:var(--neon-green); font-weight:bold;">{{ user.username }}</span>님
+                    </span>
+                    
+                    <form action="{% url 'accounts:logout' %}" method="POST" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-btn" style="background:transparent; border:1px solid #333; color:#888; padding:5px 10px; font-size:0.8rem;">
+                            로그아웃
+                        </button>
+                    </form>
+                </div>
+                
+                <a href="{% url 'movies:movie_create' %}" class="nav-btn nav-btn-filled">+ 새 리뷰</a>
+                <a href="{% url 'movies:chatbot' %}" class="nav-btn">챗봇 추천</a>
+
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="nav-btn">로그인</a>
+                <a href="{% url 'accounts:signup' %}" class="nav-btn nav-btn-filled">회원가입</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

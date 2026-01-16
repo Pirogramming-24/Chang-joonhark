@@ -1,0 +1,29 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<div class="form-container" style="max-width:500px; margin: 50px auto; padding:40px; background:#111; border-radius:10px; border:1px solid #333;">
+    <h2 style="text-align:center; margin-bottom:30px; color:var(--neon-green);">회원가입</h2>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        {% for field in form %}
+        <div style="margin-bottom:15px;">
+            <label style="display:block; color:#888; margin-bottom:5px;">{{ field.label }}</label>
+            <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" 
+                   style="width:100%; padding:10px; background:#000; border:1px solid #444; color:white; border-radius:5px;"
+                   {% if field.field.required %}required{% endif %}>
+            
+            {% if field.help_text %}
+                <p style="color:#666; font-size:0.8rem; margin-top:5px;">{{ field.help_text|safe }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p style="color:#ff4444; font-size:0.8rem;">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+
+        <button type="submit" style="width:100%; padding:12px; background:var(--neon-green); border:none; border-radius:5px; font-weight:bold; cursor:pointer; margin-top:10px;">가입하기</button>
+    </form>
+</div>
+{% endblock %}

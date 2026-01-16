@@ -1,0 +1,160 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<style>
+    .detail-container {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        /* 왼쪽 포스터 고정, 오른쪽 나머지 */
+        gap: 50px;
+        margin-top: 30px;
+    }
+
+    .detail-poster {
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        /* 은은한 네온 효과 */
+    }
+
+    .info-box h1 {
+        font-size: 3rem;
+        margin: 0 0 20px 0;
+        color: var(--neon-green);
+    }
+
+    .info-item {
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #222;
+        padding-bottom: 10px;
+    }
+
+    .info-label {
+        color: var(--neon-green);
+        font-weight: bold;
+        display: inline-block;
+        width: 100px;
+    }
+
+    .btn-group {
+        margin-top: 30px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-danger {
+        background-color: #ff4444;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        /* 1. 레이아웃을 1단으로 변경 */
+        .detail-container {
+            grid-template-columns: 1fr; /* 1열 */
+            gap: 30px;
+        }
+
+        /* 2. 포스터 크기 조절 및 가운데 정렬 */
+        .poster-section {
+            text-align: center;
+        }
+
+        .detail-poster {
+            width: 70%; /* 화면의 70%만 차지하게 (너무 크면 스크롤 힘듦) */
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* 3. 제목 폰트 줄임 */
+        .info-box h1 {
+            font-size: 2rem;
+            text-align: center;
+        }
+        
+        /* 4. 버튼 그룹 가운데 정렬 */
+        .btn-group {
+            justify-content: center;
+        }
+    }
+
+</style>
+
+<div class="detail-container">
+    <div class="poster-section">
+        {% if movie.poster_image %}
+        <img src="{{ movie.poster_image.url }}" class="detail-poster" alt="{{ movie.title }}">
+        {% elif movie.poster_path %}
+        <img src="{{ movie.poster_path }}" class="detail-poster" alt="{{ movie.title }}">
+        {% else %}
+        <div class="detail-poster"
+            style="height:500px; background:#222; display:flex; align-items:center; justify-content:center;">No Image
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="info-box">
+        <h1>{{ movie.title }}</h1>
+
+        <div class="info-item">
+            <span class="info-label">개봉일</span> {{ movie.release_date|default:"정보 없음" }}
+        </div>
+        <div class="info-item">
+            <span class="info-label">장르</span> {{ movie.genre }}
+        </div>
+        <div class="info-item">
+            <span class="info-label">감독</span> {{ movie.director }}
+        </div>
+        <div class="info-item">
+            <span class="info-label">출연</span> {{ movie.actors }}
+        </div>
+        <div class="info-item">
+            <span class="info-label">러닝타임</span> {{ movie.runtime }}분
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">러닝타임</span> {{ movie.runtime }}분
+        </div>
+
+        <div class="info-item">
+            <span class="info-label">별점</span>
+            <span style="color:yellow; font-weight:bold;">
+                ★
+                {% if avg_rating %}
+                {{ avg_rating|floatformat:1 }}
+                <span style="font-size:0.8rem; color:#888; font-weight:normal;">(유저 평균)</span>
+
+                {% elif movie.vote_average > 0 %}
+                {{ movie.vote_average|floatformat:1 }}
+                <span style="font-size:0.8rem; color:#aaa; font-weight:normal;">(TMDB)</span>
+
+                {% else %}
+                0.0
+                <span style="font-size:0.8rem; color:#555; font-weight:normal;">(평가 없음)</span>
+                {% endif %}
+            </span>
+        </div>
+
+        <div style="margin-top: 30px; line-height: 1.6;">
+            <h3>줄거리</h3>
+            <p>{{ movie.overview|default:"줄거리가 등록되지 않았습니다." }}</p>
+        </div>
+
+        <div class="btn-group">
+            <a href="{% url 'movies:movie_list' %}" class="nav-btn">목록으로</a>
+            <a href="{% url 'movies:movie_update' movie.pk %}" class="nav-btn nav-btn-filled">수정</a>
+
+            <form action="{% url 'movies:movie_delete' movie.pk %}" method="POST"
+                onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger">삭제</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

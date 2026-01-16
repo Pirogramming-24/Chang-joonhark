@@ -1,0 +1,181 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 20px auto;
+        height: 600px;
+        background-color: #111;
+        border: 1px solid #333;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .chat-header {
+        background-color: var(--neon-green);
+        color: black;
+        padding: 15px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .message {
+        max-width: 80%;
+        padding: 12px 18px;
+        border-radius: 15px;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    /* AI 메시지 (왼쪽) */
+    .message.bot {
+        align-self: flex-start;
+        background-color: #222;
+        color: #ddd;
+        border: 1px solid #444;
+        border-bottom-left-radius: 2px;
+    }
+
+    /* 사용자 메시지 (오른쪽) */
+    .message.user {
+        align-self: flex-end;
+        background-color: var(--neon-green);
+        color: black;
+        border-bottom-right-radius: 2px;
+        font-weight: bold;
+    }
+
+    .input-area {
+        padding: 20px;
+        background-color: #1a1a1a;
+        border-top: 1px solid #333;
+        display: flex;
+        gap: 10px;
+    }
+
+    .chat-input {
+        flex: 1;
+        padding: 15px;
+        border-radius: 25px;
+        border: 1px solid #444;
+        background-color: #000;
+        color: white;
+        outline: none;
+    }
+
+    .chat-input:focus {
+        border-color: var(--neon-green);
+    }
+
+    .send-btn {
+        background-color: var(--neon-green);
+        color: black;
+        border: none;
+        padding: 0 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    
+    .send-btn:hover {
+        opacity: 0.9;
+    }
+    
+    /* 로딩 애니메이션 */
+    .loading {
+        color: var(--neon-green);
+        font-size: 0.8rem;
+        margin-left: 10px;
+        display: none;
+    }
+
+    @media (max-width: 768px) {
+        .chat-container {
+            height: 80vh; /* 화면 높이의 80% */
+            margin: 10px;
+        }
+        
+        .message {
+            max-width: 90%; /* 말풍선 더 넓게 */
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">🎬 AI 영화 추천 봇</div>
+    
+    <div class="chat-messages" id="chat-box">
+        <div class="message bot">
+            안녕하세요! 저는 당신의 영화 컬렉션을 학습한 AI입니다.<br>
+            "재밌는 액션 영화 추천해줘" 처럼 물어보세요!
+        </div>
+    </div>
+    
+    <div style="padding:0 20px; margin-bottom:10px;">
+        <span class="loading" id="loading-indicator">답변을 생성하고 있습니다...</span>
+    </div>
+
+    <div class="input-area">
+        <input type="text" class="chat-input" id="user-input" placeholder="영화에 대해 물어보세요..." onkeypress="if(event.keyCode==13) sendMessage()">
+        <button class="send-btn" onclick="sendMessage()">전송</button>
+    </div>
+</div>
+
+<script>
+    function sendMessage() {
+        const inputField = document.getElementById('user-input');
+        const message = inputField.value.trim();
+        const chatBox = document.getElementById('chat-box');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        if (message === "") return;
+
+        // 1. 사용자 메시지 화면에 표시
+        chatBox.innerHTML += `<div class="message user">${message}</div>`;
+        inputField.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight; // 스크롤 내리기
+
+        // 2. 로딩 표시
+        loadingIndicator.style.display = 'block';
+
+        // 3. 서버(AJAX) 요청
+        fetch("{% url 'movies:chatbot' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: `message=${encodeURIComponent(message)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            // 4. 봇 응답 표시
+            loadingIndicator.style.display = 'none';
+            // 줄바꿈 처리해서 출력
+            const botResponse = data.response.replace(/\n/g, '<br>');
+            chatBox.innerHTML += `<div class="message bot">${botResponse}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            loadingIndicator.style.display = 'none';
+            chatBox.innerHTML += `<div class="message bot" style="color:red;">오류가 발생했습니다. 잠시 후 다시 시도해주세요.</div>`;
+        });
+    }
+</script>
+{% endblock %}

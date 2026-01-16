@@ -1,0 +1,296 @@
+{% extends 'movies/base.html' %}
+
+{% block content %}
+<style>
+    /* [스타일] 컨트롤 바 (검색, 정렬, 필터) */
+    .control-bar {
+        background-color: #111;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #333;
+    }
+
+    .filter-group, .sort-group, .search-group {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    /* 필터 버튼 스타일 */
+    .filter-btn {
+        background: transparent;
+        border: 1px solid #444;
+        color: #888;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    
+    .filter-btn:hover {
+        border-color: var(--neon-green);
+        color: var(--neon-green);
+    }
+
+    /* 활성화된 필터 */
+    .filter-btn.active {
+        background-color: var(--neon-green);
+        color: black;
+        border-color: var(--neon-green);
+        font-weight: bold;
+    }
+
+    /* 입력창 및 드롭다운 */
+    select, input[type="text"] {
+        background-color: #000;
+        border: 1px solid #444;
+        color: white;
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    button.search-btn {
+        background-color: var(--neon-green);
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    /* [스타일] 영화 그리드 */
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+    }
+
+    .movie-card {
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: transform 0.2s;
+        border: 1px solid #222;
+        height: 100%;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--neon-green);
+    }
+
+    .movie-poster {
+        width: 100%;
+        height: 330px;
+        object-fit: cover;
+    }
+
+    .movie-info {
+        padding: 15px;
+    }
+
+    .movie-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .movie-meta {
+        font-size: 12px;
+        color: var(--gray-text);
+        display: flex;
+        justify_content: space-between;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 50px;
+        margin-bottom: 50px;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background-color: #111;
+        color: #888;
+        border: 1px solid #333;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+    .page-link:hover {
+        border-color: var(--neon-green);
+        color: var(--neon-green);
+    }
+
+    .page-link.active {
+        background-color: var(--neon-green);
+        color: black;
+        border-color: var(--neon-green);
+    }
+
+    .page-link.disabled {
+        color: #333;
+        border-color: #222;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+        /* 1. 컨트롤 바 (검색/정렬): 세로 배치 */
+        .control-bar {
+            flex-direction: column;
+            align-items: stretch; /* 가로 꽉 차게 */
+            gap: 15px;
+        }
+
+        .filter-group, .sort-group, .search-group {
+            justify-content: space-between; /* 내부 요소 양끝 정렬 */
+            width: 100%;
+        }
+        
+        /* 검색창과 버튼 꽉 차게 */
+        .search-group input { flex: 1; }
+        .search-group button { width: auto; }
+
+        /* 2. 영화 그리드: 강제로 2열로 만듦 (앱 스타일) */
+        .movie-grid {
+            grid-template-columns: repeat(2, 1fr); /* 무조건 2칸 */
+            gap: 15px; /* 간격 좁힘 */
+        }
+
+        .movie-poster {
+            height: 240px; /* 포스터 높이 줄임 */
+        }
+
+        .movie-title {
+            font-size: 14px;
+        }
+    }
+</style>
+
+<h1 class="page-title" style="text-align:center; font-size:32px; margin-bottom:40px;">나의 영화 컬렉션</h1>
+
+<div class="control-bar">
+    <form method="GET" id="searchForm" style="display:contents;">
+        
+        <input type="hidden" name="page" id="page" value="{{ page_obj.number }}">
+
+        <div class="filter-group">
+            <span style="color:var(--neon-green); font-weight:bold;">필터:</span>
+            <button type="submit" name="filter" value="all" 
+                    onclick="document.getElementById('page').value=1"
+                    class="filter-btn {% if filter == 'all' %}active{% endif %}">전체</button>
+            
+            <button type="submit" name="filter" value="tmdb" 
+                    onclick="document.getElementById('page').value=1"
+                    class="filter-btn {% if filter == 'tmdb' %}active{% endif %}">TMDB</button>
+            
+            <button type="submit" name="filter" value="user" 
+                    onclick="document.getElementById('page').value=1"
+                    class="filter-btn {% if filter == 'user' %}active{% endif %}">직접 추가</button>
+        </div>
+
+        <div class="sort-group">
+            <span style="color:var(--neon-green); font-weight:bold;">정렬:</span>
+            <select name="sort" onchange="document.getElementById('page').value=1; this.form.submit()">
+                <option value="latest" {% if sort == 'latest' %}selected{% endif %}>최신 등록순</option>
+                <option value="year" {% if sort == 'year' %}selected{% endif %}>최신 년도순</option>
+                <option value="title" {% if sort == 'title' %}selected{% endif %}>제목순</option>
+                <option value="rating" {% if sort == 'rating' %}selected{% endif %}>평점순</option>
+            </select>
+        </div>
+
+        <div class="search-group">
+            <input type="text" name="q" placeholder="제목, 감독, 배우 검색" value="{{ query|default:'' }}">
+            <button type="submit" class="search-btn" onclick="document.getElementById('page').value=1">검색</button>
+        </div>
+    </form>
+</div>
+
+<div class="movie-grid">
+    {% for movie in movies %}
+    <a href="{% url 'movies:movie_detail' movie.pk %}" style="text-decoration:none; color:inherit;">
+        <div class="movie-card">
+            {% if movie.poster_image %}
+                <img src="{{ movie.poster_image.url }}" class="movie-poster" alt="{{ movie.title }}">
+            {% elif movie.poster_path %}
+                <img src="{{ movie.poster_path }}" class="movie-poster" alt="{{ movie.title }}">
+            {% else %}
+                <div class="movie-poster" style="background:#333; display:flex; align-items:center; justify-content:center;">포스터 없음</div>
+            {% endif %}
+            
+            <div class="movie-info">
+                <div class="movie-title">{{ movie.title }}</div>
+                <div class="movie-meta">
+                    <span>{{ movie.release_date|date:"Y" }}</span>
+                    <span style="color:yellow;">★ {{ movie.avg_rating|default:0.0|floatformat:1 }}</span>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <p style="text-align:center; width:100%; margin-top:50px;">조건에 맞는 영화가 없습니다.</p>
+    {% endfor %}
+</div>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a class="page-link" onclick="moveToPage(1)">&laquo;</a>
+        <a class="page-link" onclick="moveToPage({{ page_obj.previous_page_number }})">‹</a>
+    {% else %}
+        <span class="page-link disabled">&laquo;</span>
+        <span class="page-link disabled">‹</span>
+    {% endif %}
+
+    {% for page_number in page_obj.paginator.page_range %}
+        {% if page_number >= page_obj.number|add:-2 and page_number <= page_obj.number|add:2 %}
+            {% if page_number == page_obj.number %}
+                <span class="page-link active">{{ page_number }}</span>
+            {% else %}
+                <a class="page-link" onclick="moveToPage({{ page_number }})">{{ page_number }}</a>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a class="page-link" onclick="moveToPage({{ page_obj.next_page_number }})">›</a>
+        <a class="page-link" onclick="moveToPage({{ page_obj.paginator.num_pages }})">&raquo;</a>
+    {% else %}
+        <span class="page-link disabled">›</span>
+        <span class="page-link disabled">&raquo;</span>
+    {% endif %}
+</div>
+{% endif %}
+
+<script>
+    function moveToPage(page) {
+        // 1. 숨겨진 page 입력창에 이동할 페이지 번호를 넣습니다.
+        document.getElementById('page').value = page;
+        // 2. 검색/필터 조건이 담긴 폼을 제출합니다.
+        document.getElementById('searchForm').submit();
+    }
+</script>
+
+{% endblock %}
