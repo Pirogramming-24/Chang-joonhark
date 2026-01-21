@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Playground</title>
+    <style>
+        /* --- 1. 기본 초기화 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* --- 2. 네비게이션 바 스타일 --- */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e1e4e8;
+            position: sticky; /* 상단 고정 */
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        nav {
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 64px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #333;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 메뉴 링크 영역 */
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-item {
+            text-decoration: none;
+            color: #666;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: #f1f3f5;
+            color: #000;
+        }
+
+        /* 현재 보고 있는 탭 강조 스타일 */
+        .nav-item.active {
+            background-color: #e7f1ff;
+            color: #007bff;
+        }
+
+        /* 잠금 아이콘 스타일 */
+        .lock-icon {
+            font-size: 0.8em;
+            margin-left: 4px;
+            color: #adb5bd;
+        }
+
+
+        .user-info {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #495057;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .btn-login { background-color: #f1f3f5; color: #495057; }
+        .btn-login:hover { background-color: #e9ecef; }
+
+        .btn-signup { background-color: #007bff; color: white; }
+        .btn-signup:hover { background-color: #0056b3; }
+
+        .btn-logout { 
+            background-color: transparent; 
+            color: #fa5252; 
+            border: 1px solid #fa5252;
+            padding: 6px 12px;
+        }
+        .btn-logout:hover { background-color: #fa5252; color: white; }
+
+        /* --- 4. 메인 컨텐츠 영역 --- */
+        .main-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            min-height: 600px;
+        }
+
+        /* --- 5. 알림 메시지 (Toast/Flash Message) --- */
+        .messages {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="/" class="logo">
+                🤖 AI Playground
+            </a>
+
+            <div class="nav-menu">
+                <a href="{% url 'sentiment' %}" 
+                   class="nav-item {% if request.resolver_match.url_name == 'sentiment' %}active{% endif %}">
+                   😊 감정분석
+                </a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'summary' %}" 
+                       class="nav-item {% if request.resolver_match.url_name == 'summary' %}active{% endif %}">
+                       📝 뉴스요약
+                    </a>
+                {% else %}
+                    <a href="#" onclick="requireLogin('{% url 'summary' %}')" class="nav-item">
+                        📝 뉴스요약 <span class="lock-icon">🔒</span>
+                    </a>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'translate' %}" 
+                       class="nav-item {% if request.resolver_match.url_name == 'translate' %}active{% endif %}">
+                       🇰🇷🇬🇧 번역
+                    </a>
+                {% else %}
+                    <a href="#" onclick="requireLogin({% url 'translate' %}')" class="nav-item">
+                        🇰🇷🇬🇧 번역 <span class="lock-icon">🔒</span>
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="auth-actions">
+                {% if user.is_authenticated %}
+                    <span class="user-info">👋 {{ user.username }}님</span>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-logout">로그아웃</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-login">로그인</a>
+                    <a href="{% url 'signup' %}" class="btn btn-signup">회원가입</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <script>
+        function requireLogin(targetUrl) {
+            // 브라우저 기본 알림창
+            if(confirm("🔒 이 기능은 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                // '확인' 누르면 로그인 페이지로 이동 (돌아올 주소 포함)
+                window.location.href = "/accounts/login/?next=" + targetUrl;
+            }
+        }
+    </script>
+
+</body>
+</html>
