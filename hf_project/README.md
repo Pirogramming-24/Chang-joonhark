@@ -30,6 +30,54 @@ Hugging Face의 Inference API를 사용하여 서버 부하 없이 고성능 모
 
 ---
 
+## 사용 모델 (3개 이상)
+
+<!--
+### 1. facebook/nllb-200-distilled-600M
+-**태스크**: Translation (번역)
+-**입력 예시** : Today I played with my dog.
+-**출력 예시** : 결과: POSITIVE (95.23%)
+- 실행 화면 예시:![alt text](image.png)
+-->
+
+<!--
+### 2. facebook/bart-large-cnn
+-**태스크**: Summarization (요약)
+-**입력 예시** : Hyundai Motor’s labor union stated its strong opposition to the carmaker’s plan for deploying humanoid robots across its major assembly lines here and abroad.
+
+“The introduction of artificial intelligence (AI) robots — aimed at cutting labor costs — becomes visible,” the union said in a statement, Thursday. “The union warns that not a single robot can be deployed at worksites without an agreement between the union and management.”
+
+Starting this year, Hyundai Motor Group has identified the Atlas humanoid robot as its next major growth engine in the burgeoning era of physical AI.
+-**출력 예시** : Hyundai Motor’s labor union stated its strong opposition to deploying humanoid robots across its major assembly lines here and abroad . Hyundai Motor Group has identified the Atlas humanoid robot as its next major growth engine in the burgeoning era of physical AI . The Atlas robot is Hyundai's biggest growth engine for the company this year .
+- 실행 화면 예시:![alt text](image-1.png)
+-->
+
+<!--
+### 3. distilbert-base-uncased-finetuned-sst-2-english
+-**태스크**: Sentiment Analysis (감정 분석)
+-**입력 예시**: 나는 과제를 하고 있어
+-**출력 예시**: I'm doing my homework.
+- 실행 화면 예시:![alt text](image-2.png)
+-->
+
+---
+## 구현 체크리스트
+
+- [O] 탭 3개 이상 + 각 탭 별 URL 분리
+- [O] 각 탭: 입력 → 실행 → 결과 출력
+- [O] 에러 처리: 모델 호출 실패 시 사용자에게 메시지 표시
+- [O] 로딩 표시(최소한 “처리 중…” 텍스트라도)
+- [O] 요청 히스토리 5개
+- [O]`.env` 사용 (토큰/API Key 노출 금지)
+- [O]`README.md`에 모델 정보/사용 예시/실행 방법 작성 후 GitHub push
+
+### 로그인 제한 체크
+- [O] 비로그인 사용자는 1개 탭만 접근 가능
+- [O] 제한 탭 접근 시 alert 후 로그인 페이지로 redirect
+- [O] 로그인 성공 시 원래 페이지로 복귀(next)
+
+
+---
 ## 🛠 실행 방법 (Installation & Run)
 
 이 프로젝트는 **Python 3.9+** 환경에서 실행하는 것을 권장합니다.
