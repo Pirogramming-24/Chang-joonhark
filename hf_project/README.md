@@ -32,16 +32,16 @@ Hugging Face의 Inference API를 사용하여 서버 부하 없이 고성능 모
 
 ## 사용 모델 (3개 이상)
 
-<!--
-### 1. facebook/nllb-200-distilled-600M
+
+### 1. Helsinki-NLP/opus-mt-ko-en
 -**태스크**: Translation (번역)
 -**입력 예시** : Today I played with my dog.
 -**출력 예시** : 결과: POSITIVE (95.23%)
 - 실행 화면 예시:![alt text](image.png)
--->
 
-<!--
-### 2. facebook/bart-large-cnn
+
+
+### 2. sshleifer/distilbart-cnn-12-6
 -**태스크**: Summarization (요약)
 -**입력 예시** : Hyundai Motor’s labor union stated its strong opposition to the carmaker’s plan for deploying humanoid robots across its major assembly lines here and abroad.
 
@@ -50,15 +50,15 @@ Hugging Face의 Inference API를 사용하여 서버 부하 없이 고성능 모
 Starting this year, Hyundai Motor Group has identified the Atlas humanoid robot as its next major growth engine in the burgeoning era of physical AI.
 -**출력 예시** : Hyundai Motor’s labor union stated its strong opposition to deploying humanoid robots across its major assembly lines here and abroad . Hyundai Motor Group has identified the Atlas humanoid robot as its next major growth engine in the burgeoning era of physical AI . The Atlas robot is Hyundai's biggest growth engine for the company this year .
 - 실행 화면 예시:![alt text](image-1.png)
--->
 
-<!--
+
+
 ### 3. distilbert-base-uncased-finetuned-sst-2-english
 -**태스크**: Sentiment Analysis (감정 분석)
 -**입력 예시**: 나는 과제를 하고 있어
 -**출력 예시**: I'm doing my homework.
 - 실행 화면 예시:![alt text](image-2.png)
--->
+
 
 ---
 ## 구현 체크리스트
