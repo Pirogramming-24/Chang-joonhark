@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* 프로필 컨테이너 */
+    .profile-container {
+        max-width: 935px;
+        margin: 0 auto;
+        padding: 30px 20px 0;
+    }
+
+    /* 1. 프로필 헤더 (정보 섹션) */
+    .profile-header {
+        display: flex;
+        margin-bottom: 44px;
+        align-items: flex-start; /* 상단 정렬 */
+    }
+
+    /* 왼쪽: 프사 영역 */
+    .profile-img-wrapper {
+        flex-grow: 1;
+        margin-right: 30px;
+        display: flex;
+        justify-content: center;
+    }
+    .profile-img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        object-fit: cover;
+    }
+
+    /* 오른쪽: 정보 영역 */
+    .profile-info {
+        flex-grow: 2;
+        font-size: 16px;
+    }
+
+    /* 1행: 아이디 + 버튼 */
+    .profile-row-top {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .username {
+        font-size: 28px;
+        font-weight: 300;
+        margin-right: 20px;
+    }
+    .btn-edit {
+        border: 1px solid var(--border-color);
+        background: transparent;
+        border-radius: 4px;
+        padding: 5px 9px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .btn-follow {
+        background-color: var(--btn-blue);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 5px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    /* 2행: 스탯 (게시물, 팔로워, 팔로우) */
+    .profile-stats {
+        display: flex;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+    .profile-stats li {
+        margin-right: 40px;
+    }
+    .stat-number {
+        font-weight: 600;
+    }
+
+    /* 3행: 이름 및 소개 */
+    .profile-bio {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    .fullname {
+        font-weight: 600;
+        display: block;
+    }
+
+    /* 2. 게시물 네비게이션 (POSTS, SAVED 등) */
+    .profile-nav {
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: center;
+        gap: 60px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: var(--text-sub);
+        margin-bottom: 20px;
+    }
+    .nav-item {
+        padding-top: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .nav-item.active {
+        border-top: 1px solid black;
+        color: black;
+        margin-top: -1px;
+    }
+
+    /* 3. 게시물 그리드 (3열) */
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px; /* 인스타 PC 간격 */
+        padding-bottom: 50px;
+    }
+    .gallery-item {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1; /* 정사각형 유지 */
+        cursor: pointer;
+        background-color: #efefef;
+    }
+    .gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* 마우스 오버 효과 (좋아요/댓글 수) */
+    .gallery-item-info {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: none; /* 평소엔 숨김 */
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        gap: 20px;
+        font-size: 18px;
+    }
+    .gallery-item:hover .gallery-item-info {
+        display: flex; /* 마우스 올리면 보임 */
+    }
+    
+    @media (max-width: 736px) {
+        .profile-header { flex-direction: column; padding-left: 20px; }
+        .profile-img-wrapper { margin-right: 0; margin-bottom: 15px; justify-content: flex-start; }
+        .profile-img { width: 77px; height: 77px; }
+        .gallery { gap: 3px; } /* 모바일은 간격 좁게 */
+    }
+</style>
+
+<div class="profile-container">
+    <header class="profile-header">
+        <div class="profile-img-wrapper">
+            {% if profile_user.profile_image %}
+                <img src="{{ profile_user.profile_image.url }}" class="profile-img">
+            {% else %}
+                <img src="https://via.placeholder.com/150" class="profile-img">
+            {% endif %}
+        </div>
+
+        <section class="profile-info">
+            <div class="profile-row-top">
+                <h2 class="username">{{ profile_user.username }}</h2>
+                
+                {% if user == profile_user %}
+                    <button class="btn-edit">프로필 편집</button>
+                    <a href="{% url 'users:logout' %}"><i class="fa-solid fa-gear" style="font-size: 20px; margin-left: 10px; cursor: pointer;"></i></a>
+                {% else %}
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        {% if is_following %}
+                            <button type="submit" class="btn-edit">언팔로우</button>
+                        {% else %}
+                            <button type="submit" class="btn-follow">팔로우</button>
+                        {% endif %}
+                    </form>
+                {% endif %}
+            </div>
+
+            <ul class="profile-stats">
+                <li>게시물 <span class="stat-number">{{ profile_user.post_set.count }}</span></li>
+                <li>팔로워 <span class="stat-number">{{ followers_count }}</span></li>
+                <li>팔로우 <span class="stat-number">{{ following_count }}</span></li>
+            </ul>
+
+            <div class="profile-bio">
+                <span class="fullname">{{ profile_user.first_name }} {{ profile_user.last_name }}</span>
+                <p>{{ profile_user.description|linebreaksbr }}</p>
+            </div>
+        </section>
+    </header>
+
+    <div class="profile-nav">
+        <div class="nav-item active">
+            <i class="fa-solid fa-table-cells"></i> 게시물
+        </div>
+        <div class="nav-item">
+            <i class="fa-regular fa-bookmark"></i> 저장됨
+        </div>
+        <div class="nav-item">
+            <i class="fa-solid fa-user-tag"></i> 태그됨
+        </div>
+    </div>
+
+    <div class="gallery">
+        {% for post in profile_user.post_set.all|dictsortreversed:"created_at" %}
+            <div class="gallery-item" tabindex="0">
+                <img src="{{ post.image.url }}" class="gallery-image" alt="게시물">
+                
+                <div class="gallery-item-info">
+                    <span>
+                        <i class="fa-solid fa-heart" aria-hidden="true"></i> {{ post.like_users.count }}
+                    </span>
+                    <span>
+                        <i class="fa-solid fa-comment" aria-hidden="true"></i> {{ post.comments.count }}
+                    </span>
+                </div>
+            </div>
+        {% empty %}
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-sub);">
+                <i class="fa-solid fa-camera" style="font-size: 40px; margin-bottom: 10px;"></i>
+                <p>아직 게시물이 없습니다.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

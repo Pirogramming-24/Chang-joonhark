@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* 1. 검색창 컨테이너 */
+    .search-container {
+        max-width: 600px;
+        margin: 30px auto;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden; /* 테두리 둥글게 유지 */
+    }
+
+    /* 2. 헤더 (검색어 표시) */
+    .search-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .query-text {
+        color: var(--link-blue);
+    }
+
+    /* 3. 유저 리스트 아이템 */
+    .user-row {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid #efefef;
+        text-decoration: none; /* 링크 밑줄 제거 */
+        color: inherit; /* 글자색 상속 */
+        transition: background-color 0.1s;
+    }
+    .user-row:last-child { border-bottom: none; } /* 마지막 줄은 선 없애기 */
+    
+    .user-row:hover {
+        background-color: #fafafa; /* 마우스 올렸을 때 효과 */
+    }
+
+    /* 4. 프로필 사진 */
+    .search-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--border-color);
+        margin-right: 15px;
+        object-fit: cover;
+    }
+
+    /* 5. 텍스트 정보 */
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .search-username {
+        font-weight: 600;
+        font-size: 14px;
+        color: #262626;
+    }
+    .search-name {
+        font-size: 14px;
+        color: #8e8e8e; /* 회색 */
+        margin-top: 2px;
+    }
+
+    /* 6. 결과 없음 (Empty State) */
+    .no-result {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-sub);
+    }
+    .no-result-icon {
+        font-size: 50px;
+        margin-bottom: 20px;
+        color: #dbdbdb;
+    }
+</style>
+
+<div class="search-container">
+    <div class="search-header">
+        <span class="query-text">"{{ query }}"</span> 검색 결과
+    </div>
+
+    <div class="result-list">
+        {% for u in users %}
+        <a href="{% url 'users:profile' u.id %}" class="user-row">
+            {% if u.profile_image %}
+                <img src="{{ u.profile_image.url }}" class="search-img">
+            {% else %}
+                <img src="https://via.placeholder.com/44" class="search-img">
+            {% endif %}
+
+            <div class="user-info">
+                <span class="search-username">{{ u.username }}</span>
+                <span class="search-name">{{ u.name }}</span>
+            </div>
+        </a>
+        {% empty %}
+            <div class="no-result">
+                <i class="fa-regular fa-circle-xmark no-result-icon"></i>
+                <p style="font-weight: 600; font-size: 18px; color: black; margin-bottom: 10px;">검색 결과가 없습니다.</p>
+                <p>철자가 정확한지 확인하거나 다른 검색어를 입력해보세요.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

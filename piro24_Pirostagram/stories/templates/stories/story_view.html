@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story View</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { margin: 0; background-color: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; color: white; font-family: -apple-system, sans-serif; }
+        .story-container { width: 100%; height: 100%; position: relative; }
+        
+        /* 진행바 */
+        .progress-bar { display: flex; gap: 5px; padding: 10px; position: absolute; top: 0; width: 100%; box-sizing: border-box; z-index: 10; }
+        .progress-item { flex: 1; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; }
+        .progress-item.active { background: white; }
+
+        /* 헤더 */
+        .story-header { position: absolute; top: 20px; left: 10px; display: flex; align-items: center; gap: 10px; z-index: 10; width: 80%; }
+        .user-img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
+        .username { font-size: 14px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .time { font-size: 12px; opacity: 0.7; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+
+        /* 이미지 */
+        .story-image { width: 100%; height: 100%; object-fit: contain; background: #222; }
+
+        /* 네비게이션 클릭 영역 */
+        .nav-zone { position: absolute; top: 0; height: 100%; width: 50%; z-index: 5; cursor: pointer; }
+        .nav-prev { left: 0; }
+        .nav-next { right: 0; }
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.2s; }
+        .nav-zone:hover .nav-arrow { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div style="position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; z-index: 100;" onclick="closeViewer()">
+        <i class="fa-solid fa-xmark"></i>
+    </div>
+
+    <div class="story-container">
+        <div class="progress-bar">
+            <div class="progress-item active"></div>
+        </div>
+
+        <div class="story-header">
+            {% if story.author.profile_image %}
+                <img src="{{ story.author.profile_image.url }}" class="user-img">
+            {% else %}
+                <img src="https://via.placeholder.com/32" class="user-img">
+            {% endif %}
+            <div>
+                <span class="username">{{ story.author.username }}</span>
+                <span class="time">{{ story.created_at|timesince }}</span>
+            </div>
+        </div>
+
+        {% if story.image %}
+            <img src="{{ story.image.url }}" class="story-image">
+        {% else %}
+            <div style="display:flex; justify-content:center; align-items:center; height:100%;">이미지 없음</div>
+        {% endif %}
+
+        <div class="nav-zone nav-prev" onclick="goPrev()">
+            {% if prev_story_id %}
+                <div class="nav-arrow" style="left: 10px;"><i class="fa-solid fa-chevron-left"></i></div>
+            {% endif %}
+        </div>
+
+        <div class="nav-zone nav-next" onclick="goNext()">
+            <div class="nav-arrow" style="right: 10px;"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+    </div>
+
+    <script>
+        function closeViewer() {
+            // 부모 창(post_list)의 모달 닫기 함수 호출
+            if (window.parent && window.parent.closeStoryModal) {
+                window.parent.closeStoryModal();
+            } else {
+                window.location.href = "{% url 'posts:post_list' %}";
+            }
+        }
+
+        function goPrev() {
+            {% if prev_story_id %}
+                window.location.href = "{% url 'stories:story_view' prev_story_id %}";
+            {% else %}
+                closeViewer();
+            {% endif %}
+        }
+
+        function goNext() {
+            {% if next_story_id %}
+                window.location.href = "{% url 'stories:story_view' next_story_id %}";
+            {% else %}
+                closeViewer();
+            {% endif %}
+        }
+    </script>
+</body>
+</html>

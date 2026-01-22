@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* 화면 중앙 정렬을 위한 래퍼 */
+    .create-post-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-top: 40px;
+        min-height: 80vh;
+    }
+
+    /* 메인 박스 (모달 스타일) */
+    .create-box {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 800px; /* 넓은 레이아웃 */
+        height: 550px;    /* 고정 높이 */
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* 1. 헤더 */
+    .box-header {
+        height: 50px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 16px;
+        background: white;
+    }
+    .header-title { font-weight: 600; font-size: 16px; flex-grow: 1; text-align: center; }
+    .btn-share {
+        background: none;
+        border: none;
+        color: var(--btn-blue);
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .btn-share:hover { color: #00376b; }
+
+    /* 2. 바디 (2단 레이아웃: 이미지 vs 글쓰기) */
+    .box-body {
+        display: flex;
+        flex-grow: 1;
+        height: 100%;
+    }
+
+    /* 좌측: 이미지 업로드 영역 */
+    .upload-section {
+        flex: 1.5; /* 60% 비율 */
+        background-color: #FAFAFA;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-right: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* 업로드 전 안내 문구 */
+    .upload-placeholder {
+        text-align: center;
+        display: flex; /* JS로 숨김 처리 예정 */
+        flex-direction: column;
+        align-items: center;
+    }
+    .media-icon { font-size: 60px; color: var(--text-main); margin-bottom: 20px; }
+    .upload-text { font-size: 20px; font-weight: 300; margin-bottom: 20px; }
+    
+    /* 파일 선택 버튼 */
+    .custom-file-btn {
+        background-color: var(--btn-blue);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* 이미지 미리보기 (초기엔 숨김) */
+    #image-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+    }
+
+    /* 우측: 글쓰기 영역 */
+    .caption-section {
+        flex: 1; /* 40% 비율 */
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 작성자 프로필 */
+    .author-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .author-img {
+        width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border-color); margin-right: 10px;
+    }
+    .author-name { font-weight: 600; font-size: 14px; }
+
+    /* 텍스트 입력창 커스텀 */
+    textarea {
+        width: 100%;
+        height: 200px;
+        border: none;
+        resize: none; /* 크기 조절 막기 */
+        outline: none;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    /* 모바일 반응형 (세로 배치) */
+    @media (max-width: 650px) {
+        .create-box { height: auto; min-height: 500px; }
+        .box-body { flex-direction: column; }
+        .upload-section { height: 350px; border-right: none; border-bottom: 1px solid var(--border-color); }
+        .caption-section { height: auto; }
+    }
+</style>
+
+<div class="create-post-wrapper">
+    <form method="post" enctype="multipart/form-data" class="create-box">
+        {% csrf_token %}
+        
+        <div class="box-header">
+            <a href="{% url 'posts:post_list' %}" style="width: 30px;"><i class="fa-solid fa-arrow-left" style="font-size: 20px;"></i></a>
+            <span class="header-title">새 게시물 만들기</span>
+            <button type="submit" class="btn-share">공유하기</button>
+        </div>
+
+        <div class="box-body">
+            <div class="upload-section">
+                {{ form.image }} <div class="upload-placeholder" id="placeholder-box">
+                    <i class="fa-regular fa-images media-icon"></i>
+                    <span class="upload-text">사진을 여기에 놓으세요</span>
+                    <label for="id_image" class="custom-file-btn">컴퓨터에서 선택</label>
+                </div>
+
+                <img id="image-preview" src="#" alt="미리보기">
+            </div>
+
+            <div class="caption-section">
+                <div class="author-info">
+                    {% if user.profile_image %}
+                        <img src="{{ user.profile_image.url }}" class="author-img">
+                    {% else %}
+                        <img src="https://via.placeholder.com/28" class="author-img">
+                    {% endif %}
+                    <span class="author-name">{{ user.username }}</span>
+                </div>
+                
+                {{ form.content }}
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 1. 이미지 Input 숨기기 (label로 제어하기 위해)
+    const fileInput = document.getElementById('id_image');
+    fileInput.style.display = 'none'; // CSS로 숨김 처리
+
+    // 2. 미리보기 로직
+    const placeholderBox = document.getElementById('placeholder-box');
+    const previewImg = document.getElementById('image-preview');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                // 미리보기 이미지 소스 설정 및 표시
+                previewImg.src = event.target.result;
+                previewImg.style.display = 'block';
+                
+                // 안내 문구 숨기기
+                placeholderBox.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // 3. 텍스트 영역 placeholder 설정
+    const contentInput = document.getElementById('id_content');
+    contentInput.placeholder = "문구를 입력하세요...";
+</script>
+{% endblock %}

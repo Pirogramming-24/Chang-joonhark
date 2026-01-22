@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* 로그인 전용 레이아웃 */
+    .auth-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 30px;
+    }
+    .box {
+        background: white;
+        border: 1px solid var(--border-color);
+        width: 350px;
+        margin-bottom: 10px;
+        padding: 40px;
+        text-align: center;
+    }
+    .logo-big {
+        font-family: 'Grand Hotel', cursive;
+        font-size: 3rem;
+        margin-bottom: 30px;
+        display: block;
+    }
+    .auth-input {
+        width: 100%;
+        background: #FAFAFA;
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        padding: 9px 8px;
+        margin-bottom: 6px;
+        font-size: 12px;
+        outline: none;
+    }
+    .auth-input:focus { border: 1px solid #a8a8a8; }
+    
+    .btn-login {
+        width: 100%;
+        background-color: var(--btn-blue);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 7px;
+        font-weight: 600;
+        margin-top: 15px;
+        cursor: pointer;
+    }
+    .btn-login:disabled { opacity: 0.7; }
+
+    .signup-box { padding: 25px; font-size: 14px; }
+    .signup-link { color: var(--link-blue); font-weight: 600; }
+</style>
+
+<div class="auth-wrapper">
+    <div class="box">
+        <span class="logo-big">Pirostagram</span>
+        
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" class="auth-input" placeholder="전화번호, 사용자 이름 또는 이메일" required>
+            <input type="password" name="password" class="auth-input" placeholder="비밀번호" required>
+            
+            <button type="submit" class="btn-login">로그인</button>
+        </form>
+    </div>
+
+    <div class="box signup-box">
+        계정이 없으신가요? <a href="{% url 'users:signup' %}" class="signup-link">가입하기</a>
+    </div>
+</div>
+{% endblock %}

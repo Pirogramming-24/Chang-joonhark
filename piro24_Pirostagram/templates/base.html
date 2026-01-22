@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirostagram</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #FAFAFA;
+            --border-color: #DBDBDB;
+            --text-main: #262626;
+            --text-sub: #8E8E8E;
+            --link-blue: #0095F6;
+            --btn-blue: #0095F6;
+            --danger: #ED4956;
+        }
+
+        /* Reset & Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            overflow-y: scroll;
+        }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        img { display: block; }
+        
+        /* Layout Wrapper */
+        .layout-wrapper {
+            padding-top: 60px; /* Nav Height */
+            max-width: 935px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Navigation Bar */
+        nav {
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            height: 60px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .nav-content {
+            width: 100%;
+            max-width: 975px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-family: 'Grand Hotel', cursive;
+            font-size: 29px;
+            margin-top: 7px;
+        }
+        .search-bar input {
+            background: #EFEFEF;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            width: 268px;
+            font-size: 14px;
+            outline: none;
+        }
+        .nav-icons {
+            display: flex;
+            gap: 22px;
+            font-size: 22px;
+            align-items: center;
+        }
+        .nav-icons i { cursor: pointer; color: black; }
+        .nav-profile-img {
+            width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border-color);
+        }
+
+        /* Buttons */
+        .btn-blue {
+            background-color: var(--btn-blue);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 9px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-text {
+            color: var(--link-blue);
+            font-weight: 600;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-content">
+            <a href="{% url 'posts:post_list' %}" class="logo">Pirostagram</a>
+            
+            <div class="search-bar">
+                <form action="{% url 'users:search' %}" method="get">
+                    <input type="text" name="q" placeholder="검색">
+                </form>
+            </div>
+
+            <div class="nav-icons">
+                <a href="{% url 'posts:post_list' %}"><i class="fa-solid fa-house"></i></a> <a href="{% url 'posts:post_create' %}"><i class="fa-regular fa-square-plus"></i></a> {% if user.is_authenticated %}
+                    <a href="{% url 'users:profile' user.id %}">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" class="nav-profile-img">
+                        {% else %}
+                            <i class="fa-regular fa-user"></i>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'users:logout' %}"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn-blue" style="font-size: 12px; text-decoration: none;">로그인</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="layout-wrapper">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+</body>
+</html>
