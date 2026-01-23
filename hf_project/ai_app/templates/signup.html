@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .auth-card {
+        max-width: 450px;
+        margin: 40px auto;
+        padding: 40px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+    .auth-title { font-size: 24px; font-weight: 700; color: #333; margin-bottom: 20px; }
+    
+    /* 폼 요소 스타일 */
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; }
+    
+    .auth-card input[type="text"],
+    .auth-card input[type="password"], 
+    .auth-card input[type="email"] {
+        width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px;
+        font-size: 15px; box-sizing: border-box;
+    }
+    .auth-card input:focus {
+        border-color: #007bff; 
+        outline: none; box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    /* 회원가입 버튼 */
+    .btn-signupp {
+        width: 100%; padding: 12px; background-color: #007bff; color: white;
+        border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
+        cursor: pointer; margin-top: 10px; transition: background-color 0.2s;
+    }
+    .btn-signupp:hover { background-color: #0056b3; }
+
+    /* Django 도움말 텍스트 (비밀번호 규칙 등) 스타일링 */
+    .helptext {
+        display: block; font-size: 12px; color: #888; margin-top: 5px; line-height: 1.4;
+    }
+    ul { list-style: none; padding: 0; } /* 에러 리스트 점 없애기 */
+</style>
+
+<div class="auth-card">
+    <div class="auth-title">🚀 계정 만들기</div>
+    <p style="color: #666; margin-bottom: 30px;">간편하게 가입하고 AI 기능을 체험해보세요.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <span class="helptext">{{ field.help_text|safe }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: red; font-size: 12px; margin-top: 5px;">⚠️ {{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn-signupp">가입완료</button>
+    </form>
+
+    <div style="margin-top: 20px; font-size: 14px; color: #666;">
+        이미 계정이 있으신가요? <a href="{% url 'login' %}" style="color: #007bff; text-decoration: none; font-weight: bold;">로그인</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 50px auto; background: white; border: 1px solid #dbdbdb; padding: 20px; border-radius: 8px;">
+    <h3 style="text-align: center; margin-bottom: 20px;">댓글 수정</h3>
+    
+    <form method="post">
+        {% csrf_token %}
+        <textarea name="content" rows="3" style="width: 100%; border: 1px solid #dbdbdb; padding: 10px; margin-bottom: 10px; resize: none;">{{ form.content.value }}</textarea>
+        
+        <button type="submit" style="width: 100%; background: #0095f6; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+            수정 완료
+        </button>
+    </form>
+    
+    <div style="text-align: center; margin-top: 15px;">
+        <a href="{% url 'posts:post_list' %}" style="color: #ed4956; font-size: 13px;">취소</a>
+    </div>
+</div>
+{% endblock %}

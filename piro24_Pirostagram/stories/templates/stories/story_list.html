@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* 전체 컨테이너 (중앙 정렬) */
+    .story-page-wrapper {
+        max-width: 630px; /* 인스타 스토리 뷰어 너비 */
+        margin: 0 auto;
+        padding-top: 20px;
+    }
+
+    /* 상단 스토리 바 (피드에 붙일 때 유용) */
+    .story-bar {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+        padding: 15px 0;
+        margin-bottom: 30px;
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        /* 스크롤바 숨기기 */
+        scrollbar-width: none; 
+    }
+    .story-bar::-webkit-scrollbar { display: none; }
+
+    /* 스토리 아이템 */
+    .story-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 70px;
+        flex-shrink: 0;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    
+    /* 인스타 그라데이션 링 */
+    .story-ring {
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        padding: 2px; /* 링 두께 */
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    /* 내 스토리(업로드)는 회색 링 */
+    .story-ring.mine {
+        background: #dbdbdb;
+        position: relative;
+    }
+
+    /* 실제 프로필 이미지 */
+    .story-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2px solid white; /* 이미지와 링 사이 흰색 여백 */
+        object-fit: cover;
+        background: white;
+    }
+
+    .story-username {
+        font-size: 11px;
+        color: #262626;
+        width: 100%;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* 스토리 뷰어 (카드) */
+    .story-viewer {
+        background: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        aspect-ratio: 9 / 16; /* 모바일 비율 */
+        max-height: 80vh;
+        margin-bottom: 20px;
+    }
+    .story-content-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .story-overlay {
+        position: absolute;
+        top: 20px; left: 15px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .story-time { font-size: 12px; opacity: 0.8; }
+
+</style>
+
+<div class="story-page-wrapper">
+    
+    <div class="story-bar">
+        <a href="{% url 'stories:story_create' %}" class="story-item">
+            <div class="story-ring mine">
+                {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" class="story-img">
+                {% else %}
+                    <img src="https://via.placeholder.com/60" class="story-img">
+                {% endif %}
+                <i class="fa-solid fa-circle-plus" style="position: absolute; bottom: 0; right: 0; color: #0095f6; font-size: 18px; background: white; border-radius: 50%;"></i>
+            </div>
+            <span class="story-username">내 스토리</span>
+        </a>
+
+        {% for story in stories %}
+            <div class="story-item" onclick="document.getElementById('view-story-{{ story.id }}').scrollIntoView({behavior: 'smooth'})">
+                <div class="story-ring">
+                    {% if story.author.profile_image %}
+                        <img src="{{ story.author.profile_image.url }}" class="story-img">
+                    {% else %}
+                        <img src="https://via.placeholder.com/60" class="story-img">
+                    {% endif %}
+                </div>
+                <span class="story-username">{{ story.author.username }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% for story in stories %}
+    <div id="view-story-{{ story.id }}" class="story-viewer">
+        <div class="story-overlay">
+            {% if story.author.profile_image %}
+                <img src="{{ story.author.profile_image.url }}" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.5);">
+            {% endif %}
+            <span style="font-weight: 600;">{{ story.author.username }}</span>
+            <span class="story-time">{{ story.created_at|timesince }}</span>
+        </div>
+
+        {% if story.photos.all %}
+            <img src="{{ story.photos.first.image.url }}" class="story-content-img">
+        {% else %}
+            <div style="display:flex; justify-content:center; align-items:center; height:100%; color:gray;">이미지 없음</div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding: 50px;">
+        <p>새로운 스토리가 없습니다.</p>
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

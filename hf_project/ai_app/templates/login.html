@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* 로그인/회원가입 전용 스타일 */
+    .auth-card {
+        max-width: 420px;
+        margin: 50px auto;
+        padding: 40px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        text-align: center;
+    }
+    .auth-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 30px;
+    }
+    /* 폼 스타일 커스텀 */
+    .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+    }
+    /* Django 폼 input 태그 타겟팅 */
+    .auth-card input[type="text"],
+    .auth-card input[type="password"] {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: border-color 0.2s;
+        box-sizing: border-box; /* 패딩 포함 크기 계산 */
+    }
+    .auth-card input:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+    /* 버튼 스타일 */
+    .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        margin-top: 10px;
+    }
+    .btn-submit:hover {
+        background-color: #0056b3;
+    }
+    .auth-footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #666;
+    }
+    .auth-footer a {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+    /* 에러 메시지 스타일 */
+    .errorlist {
+        color: #dc3545;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 15px;
+        font-size: 14px;
+        text-align: left;
+    }
+</style>
+
+<div class="auth-card">
+    <div class="auth-title">👋 환영합니다!</div>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+            <div style="background: #fff5f5; border: 1px solid #ffcccc; padding: 10px; border-radius: 5px; margin-bottom: 20px;">
+                <p style="color: #dc3545; margin: 0; font-size: 14px;">아이디 또는 비밀번호가 일치하지 않습니다.</p>
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">아이디</label>
+            {{ form.username }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">비밀번호</label>
+            {{ form.password }}
+        </div>
+
+        <button type="submit" class="btn-submit">로그인</button>
+    </form>
+
+    <div class="auth-footer">
+        계정이 없으신가요? <a href="{% url 'signup' %}">회원가입</a>
+    </div>
+</div>
+{% endblock %}

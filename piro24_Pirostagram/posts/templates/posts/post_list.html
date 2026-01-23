@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* ===========================
+       1. 기존 스타일 (유지)
+       =========================== */
+    .main-grid { display: grid; grid-template-columns: 470px 320px; gap: 64px; justify-content: center; padding-top: 30px; }
+    @media (max-width: 1000px) { .main-grid { grid-template-columns: 470px; } .sidebar { display: none; } }
+    
+    .post-card { background: white; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; }
+    .post-header { display: flex; align-items: center; padding: 14px; border-bottom: 1px solid #EFEFEF; height: 60px;}
+    .header-img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-color); margin-right: 10px; }
+    .header-username { font-weight: 600; font-size: 14px; color: black; }
+    
+    .dropdown { position: relative; display: inline-block; margin-left: auto;}
+    .header-option { cursor: pointer; padding: 8px; }
+    .dropdown-content { display: none; position: absolute; right: 0; background-color: white; min-width: 100px; box-shadow: 0px 4px 12px rgba(0,0,0,0.15); z-index: 10; border-radius: 6px; overflow: hidden; border: 1px solid #dbdbdb; }
+    .dropdown:hover .dropdown-content { display: block; }
+    .dropdown-item { color: black; padding: 10px 15px; text-decoration: none; display: block; font-size: 13px; cursor: pointer; }
+    .dropdown-item:hover { background-color: #fafafa; }
+    .dropdown-item.delete { color: #ed4956; font-weight: 600; border-top: 1px solid #efefef; }
+
+    .post-img { width: 100%; height: auto; display: block; }
+    .post-actions { padding: 12px; display: flex; gap: 16px; font-size: 24px; }
+    .post-actions .fa-bookmark { margin-left: auto; }
+    
+    .post-info { padding: 0 12px 12px; font-size: 14px; }
+    .likes-text { font-weight: 600; margin-bottom: 8px; display: block; }
+    .caption-text { margin-bottom: 8px; line-height: 1.3; }
+    .time-text { font-size: 10px; color: var(--text-sub); text-transform: uppercase; margin-top: 5px; display: block;}
+    
+    .comment-list { margin-bottom: 8px; }
+    .comment-item { margin-bottom: 4px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .comment-content-wrapper { display: flex; gap: 5px; flex: 1; }
+    .comment-actions { display: flex; gap: 8px; font-size: 11px; align-items: center; opacity: 0.5; margin-left: 10px;}
+    .comment-actions:hover { opacity: 1; }
+    
+    .comment-input-area { border-top: 1px solid #EFEFEF; padding: 12px; display: flex; align-items: center; }
+    .comment-input-area input { border: none; flex: 1; outline: none; font-size: 14px; }
+    
+    .sidebar { position: fixed; left: calc(50% + 170px); top: 90px; width: 320px; }
+    .side-profile { display: flex; align-items: center; margin-bottom: 20px; }
+    .side-img { width: 56px; height: 56px; border-radius: 50%; border: 1px solid var(--border-color); margin-right: 15px; }
+
+    /* 좋아요 애니메이션 */
+    .fa-heart { cursor: pointer; color: #262626; transition: transform 0.2s ease, color 0.2s ease; }
+    .fa-heart:hover { transform: scale(1.15); color: #8e8e8e; }
+    .heart-active { color: #ed4956 !important; animation: heartBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .heart-active:hover { color: #c23b45 !important; transform: scale(1.15); }
+    @keyframes heartBounce { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 70% { transform: scale(0.9); } 100% { transform: scale(1); } }
+
+    /* ===========================
+       2. 스토리 바 스타일 (추가됨)
+       =========================== */
+    .story-section {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 24px;
+        padding: 16px 0;
+        overflow-x: auto; /* 가로 스크롤 */
+        white-space: nowrap;
+        scrollbar-width: none; /* 파이어폭스 스크롤 숨김 */
+    }
+    .story-section::-webkit-scrollbar { display: none; } /* 크롬 스크롤 숨김 */
+
+    .story-scroll-container { display: flex; padding: 0 15px; gap: 15px; }
+
+    .story-circle-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        width: 66px;
+    }
+
+    .story-ring {
+        width: 66px; height: 66px;
+        border-radius: 50%;
+        padding: 2px;
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        display: flex; justify-content: center; align-items: center;
+        margin-bottom: 5px;
+    }
+    
+    .story-img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid white; object-fit: cover; }
+    .story-username { font-size: 11px; color: #262626; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%; text-align: center; }
+
+    /* 내 스토리 추가 버튼용 스타일 */
+    .story-ring.add { background: none; border: 1px solid #dbdbdb; padding: 0; position: relative; }
+    .add-icon { position: absolute; bottom: 0; right: 0; color: #0095f6; background: white; border-radius: 50%; font-size: 18px; border: 2px solid white; }
+
+    /* ===========================
+       3. 스토리 모달 (뷰어) 스타일
+       =========================== */
+    .story-modal {
+        display: none; /* 평소엔 숨김 */
+        position: fixed;
+        z-index: 9999; /* 최상단 */
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.85); /* 검은 반투명 배경 */
+        justify-content: center; align-items: center;
+    }
+
+    .story-frame-container {
+        width: 100%;
+        max-width: 420px; /* 인스타 뷰어 너비 */
+        height: 100%;
+        max-height: 90vh;
+        position: relative;
+    }
+    
+    iframe { width: 100%; height: 100%; border: none; border-radius: 8px; background: black; }
+
+    .modal-close-btn {
+        position: absolute; top: 20px; right: 20px;
+        color: white; font-size: 30px; cursor: pointer; z-index: 10000;
+    }
+</style>
+
+<div class="main-grid">
+    <div class="feed-section">
+        
+        <div class="story-section">
+            <div class="story-scroll-container">
+                <a href="{% url 'stories:story_create' %}" class="story-circle-wrapper" style="text-decoration: none;">
+                    <div class="story-ring add">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" class="story-img" style="border:none;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/60" class="story-img" style="border:none;">
+                        {% endif %}
+                        <i class="fa-solid fa-circle-plus add-icon"></i>
+                    </div>
+                    <span class="story-username">내 스토리</span>
+                </a>
+
+                {% for story in stories %}
+                <div class="story-circle-wrapper" onclick="openStoryModal('{% url 'stories:story_view' story.id %}')">
+                    <div class="story-ring">
+                        {% if story.author.profile_image %}
+                            <img src="{{ story.author.profile_image.url }}" class="story-img">
+                        {% else %}
+                            <img src="https://via.placeholder.com/60" class="story-img">
+                        {% endif %}
+                    </div>
+                    <span class="story-username">{{ story.author.username }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% for post in posts %}
+        <article class="post-card">
+            <div class="post-header">
+                <a href="{% url 'users:profile' post.author.id %}" style="display: flex; align-items: center;">
+                    {% if post.author.profile_image %}
+                        <img src="{{ post.author.profile_image.url }}" class="header-img">
+                    {% else %}
+                        <img src="https://via.placeholder.com/32" class="header-img">
+                    {% endif %}
+                    <span class="header-username">{{ post.author.username }}</span>
+                </a>
+
+                {% if post.author == user %}
+                <div class="dropdown">
+                    <i class="fa-solid fa-ellipsis header-option"></i>
+                    <div class="dropdown-content">
+                        <a href="{% url 'posts:post_update' post.pk %}" class="dropdown-item">게시글 수정</a>
+                        <a href="{% url 'posts:post_delete' post.pk %}" class="dropdown-item delete" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <img src="{{ post.image.url }}" class="post-img">
+
+            <div class="post-actions">
+                <i class="fa-solid fa-heart {% if user in post.like_users.all %}heart-active{% endif %}" 
+                   onclick="likePost({{ post.pk }})" id="like-icon-{{ post.pk }}"></i>
+                <i class="fa-regular fa-comment"></i>
+                <i class="fa-regular fa-paper-plane"></i>
+                <i class="fa-regular fa-bookmark"></i>
+            </div>
+
+            <div class="post-info">
+                <span class="likes-text" id="like-count-{{ post.pk }}">좋아요 {{ post.like_users.count }}개</span>
+                
+                <div class="caption-text">
+                    <span style="font-weight: 600; margin-right: 5px;">{{ post.author.username }}</span>
+                    {{ post.content }}
+                </div>
+
+                <div class="comment-list">
+                    {% for comment in post.comments.all %}
+                    <div class="comment-item">
+                        <div class="comment-content-wrapper">
+                            <span style="font-weight: 600; font-size: 13px;">{{ comment.author.username }}</span>
+                            <span style="font-size: 13px;">{{ comment.content }}</span>
+                        </div>
+                        
+                        {% if comment.author == user %}
+                        <div class="comment-actions">
+                            <a href="{% url 'posts:comment_update' comment.pk %}"><i class="fa-solid fa-pencil"></i></a>
+                            <a href="{% url 'posts:comment_delete' comment.pk %}" onclick="return confirm('댓글을 삭제할까요?')"><i class="fa-solid fa-xmark" style="color:#ed4956;"></i></a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <span class="time-text">{{ post.created_at|timesince }} 전</span>
+            </div>
+
+            <form action="{% url 'posts:comment_create' post.pk %}" method="post" class="comment-input-area">
+                {% csrf_token %}
+                <i class="fa-regular fa-face-smile" style="font-size: 24px; margin-right: 10px;"></i>
+                <input type="text" name="content" placeholder="댓글 달기..." required>
+                <button type="submit" style="background: none; border: none; color: #0095f6; font-weight: 600; cursor: pointer;">게시</button>
+            </form>
+        </article>
+        {% empty %}
+        <div style="text-align: center; padding: 50px;">
+            <p>게시물이 없습니다.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="sidebar">
+        {% if user.is_authenticated %}
+        <div class="side-profile">
+            <a href="{% url 'users:profile' user.id %}">
+                {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" class="side-img">
+                {% else %}
+                    <img src="https://via.placeholder.com/56" class="side-img">
+                {% endif %}
+            </a>
+            <div>
+                <a href="{% url 'users:profile' user.id %}" style="font-weight: 600; display: block;">{{ user.username }}</a>
+                <span style="color: var(--text-sub);">{{ user.name }}</span>
+            </div>
+            <a href="{% url 'users:logout' %}" style="margin-left: auto; color: #0095f6; font-size: 12px; font-weight: 600;">전환</a>
+        </div>
+        {% endif %}
+        <div style="font-size: 11px; color: #c7c7c7; margin-top: 20px;">
+            © 2026 PIROSTAGRAM FROM PIRO
+        </div>
+    </div>
+</div>
+
+<div id="storyModal" class="story-modal">
+    <i class="fa-solid fa-xmark modal-close-btn" onclick="closeStoryModal()"></i>
+    
+    <div class="story-frame-container">
+        <iframe id="storyFrame" src=""></iframe>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    // [좋아요 기능]
+    const likePost = (postId) => {
+        axios.post('/posts/like/ajax/', { post_id: postId }, {
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        }).then(res => {
+            const icon = document.getElementById(`like-icon-${postId}`);
+            const count = document.getElementById(`like-count-${postId}`);
+            if (res.data.is_liked) {
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid', 'heart-active');
+            } else {
+                icon.classList.remove('fa-solid', 'heart-active');
+                icon.classList.add('fa-regular');
+            }
+            count.innerText = `좋아요 ${res.data.like_count}개`;
+        }).catch(err => console.error(err));
+    }
+
+    // [스토리 모달 열기]
+    function openStoryModal(url) {
+        const modal = document.getElementById('storyModal');
+        const frame = document.getElementById('storyFrame');
+        
+        frame.src = url; // 뷰어 URL 주입
+        modal.style.display = 'flex'; // 모달 보이기
+        document.body.style.overflow = 'hidden'; // 배경 스크롤 막기
+    }
+
+    // [스토리 모달 닫기]
+    function closeStoryModal() {
+        const modal = document.getElementById('storyModal');
+        const frame = document.getElementById('storyFrame');
+        
+        modal.style.display = 'none'; // 모달 숨기기
+        frame.src = ''; // 영상/내용 초기화 (소리 끊기 등)
+        document.body.style.overflow = 'auto'; // 배경 스크롤 복구
+        
+        // 스토리를 다 보고 나오면 읽음 처리를 위해 새로고침하고 싶다면 아래 주석 해제
+        // window.location.reload();
+    }
+</script>
+{% endblock %}

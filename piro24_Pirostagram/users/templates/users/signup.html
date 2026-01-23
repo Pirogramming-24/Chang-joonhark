@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .auth-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    .box {
+        background: white;
+        border: 1px solid var(--border-color);
+        width: 350px;
+        margin-bottom: 10px;
+        padding: 40px;
+        text-align: center;
+    }
+    .logo-big {
+        font-family: 'Grand Hotel', cursive;
+        font-size: 3rem;
+        margin-bottom: 15px;
+        display: block;
+    }
+    .subtitle {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-sub);
+        margin-bottom: 20px;
+        line-height: 1.4;
+    }
+    .signup-form {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .signup-form input:not([type="file"]), 
+    .signup-form textarea {
+        width: 100%;
+        background: #FAFAFA;
+        border: 1px solid var(--border-color);
+        border-radius: 3px;
+        padding: 9px 8px;
+        font-size: 12px;
+        outline: none;
+        box-sizing: border-box;
+    }
+    
+    .file-upload-wrapper {
+        text-align: left;
+        font-size: 12px;
+        color: var(--text-sub);
+        margin-top: 10px;
+        border: 1px solid var(--border-color);
+        padding: 10px;
+        border-radius: 3px;
+        background: #FAFAFA;
+    }
+
+    .btn-signup {
+        width: 100%;
+        background-color: var(--btn-blue);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 7px;
+        font-weight: 600;
+        margin-top: 15px;
+        cursor: pointer;
+    }
+    .login-box { padding: 25px; font-size: 14px; }
+    .login-link { color: var(--link-blue); font-weight: 600; }
+    
+    .error-msg {
+        color: var(--danger);
+        font-size: 11px;
+        text-align: left;
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div class="box">
+        <span class="logo-big">Pirostagram</span>
+        <h2 class="subtitle">친구들의 사진과 동영상을 보려면 가입하세요.</h2>
+        
+        <form method="post" enctype="multipart/form-data" class="signup-form">
+            {% csrf_token %}
+            
+            {{ form.name }}
+            {% if form.name.errors %}<div class="error-msg">{{ form.name.errors.0 }}</div>{% endif %}
+
+            {{ form.username }}
+            {% if form.username.errors %}<div class="error-msg">{{ form.username.errors.0 }}</div>{% endif %}
+
+            <input type="password" name="password1" placeholder="비밀번호" required>
+            <input type="password" name="password2" placeholder="비밀번호 확인" required>
+            
+            {% if form.non_field_errors %}
+                <div class="error-msg">{{ form.non_field_errors.0 }}</div>
+            {% endif %}
+
+            {{ form.description }}
+
+            <div class="file-upload-wrapper">
+                <label style="display:block; margin-bottom:5px; font-weight:600;">프로필 사진</label>
+                {{ form.profile_image }}
+            </div>
+
+            <p style="font-size: 11px; color: #8e8e8e; margin: 15px 0; line-height: 1.5;">
+                가입하면 Pirostagram의 약관, 데이터 정책 및 쿠키 정책에 동의하게 됩니다.
+            </p>
+
+            <button type="submit" class="btn-signup">가입</button>
+        </form>
+    </div>
+
+    <div class="box login-box">
+        계정이 있으신가요? <a href="{% url 'users:login' %}" class="login-link">로그인</a>
+    </div>
+</div>
+{% endblock %}
